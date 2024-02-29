@@ -1,40 +1,63 @@
 #include "binary_trees.h"
 
 /**
- * sorted_array_to_avl - Builds an AVL tree from a sorted array
- * @array: Pointer to the first element of the array
- * @size: Number of elements in the array
+ * create_tree - creates an AVL tree with recursion
  *
- * Return: Pointer to the root node of the created AVL, or NULL on failure
-*/
-avl_t *sorted_array_to_avl(int *array, size_t size) {
+ * @node: pointer node
+ * @array: input array of integers
+ * @size: size of array
+ * @mode: 1 to adding on the left, 2 to adding on the right
+ * Return: no return
+ */
+void create_tree(avl_t **node, int *array, size_t size, int mode)
+{
+	size_t middle;
 
-  if (!array || size == 0)
-    return NULL;
-  
-  return construct_avl(array, 0, size - 1);
+	if (size == 0)
+		return;
 
+	middle = (size / 2);
+	middle = (size % 2 == 0) ? middle - 1 : middle;
+
+	if (mode == 1)
+	{
+		(*node)->left = binary_tree_node(*node, array[middle]);
+		create_tree(&((*node)->left), array, middle, 1);
+		create_tree(&((*node)->left), array + middle + 1, (size - 1 - middle), 2);
+	}
+	else
+	{
+		(*node)->right = binary_tree_node(*node, array[middle]);
+		create_tree(&((*node)->right), array, middle, 1);
+		create_tree(&((*node)->right), array + middle + 1, (size - 1 - middle), 2);
+	}
 }
 
-
 /**
- * construct_avl - Recursively constructs AVL tree from portion of array
- * @array: Array to construct tree from
- * @start: Starting index in array 
- * @end: Ending index in array
+ * sorted_array_to_avl - creates root node and calls to create_tree
  *
- * Return: Pointer to root node of constructed AVL tree
-*/
-static avl_t *construct_avl(int *array, size_t start, size_t end) {
+ * @array: input array of integers
+ * @size: size of array
+ * Return: pointer to the root
+ */
+avl_t *sorted_array_to_avl(int *array, size_t size)
+{
+	avl_t *root;
+	size_t middle;
 
-  if (start > end) 
-    return NULL;
+	root = NULL;
 
-  size_t mid = (start + end) / 2;
+	if (size == 0)
+		return (NULL);
 
-  avl_t *node = binary_tree_node(NULL, array[mid]);
-  node->left = construct_avl(array, start, mid - 1);
-  node->right = construct_avl(array, mid + 1, end);
+	middle = (size / 2);
 
-  return rebalance(node);
+	middle = (size % 2 == 0) ? middle - 1 : middle;
+
+	root = binary_tree_node(root, array[middle]);
+
+	create_tree(&root, array, middle, 1);
+	create_tree(&root, array + middle + 1, (size - 1 - middle), 2);
+
+	return (root);
 }
